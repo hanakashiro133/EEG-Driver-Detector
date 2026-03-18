@@ -1,7 +1,7 @@
 """
 feature_matrix.py
 
-提供一个特征矩阵收集器和装饰器，用于将每次计算得到的 5 个特征实时追加为特征矩阵的列。
+提供一个特征矩阵收集器和装饰器，用于将每次计算得到的 6 个特征实时追加为特征矩阵的列。
 
 接口：
 - `FeatureMatrixCollector(n_features=5, as_columns=True)`
@@ -23,7 +23,7 @@ feature_matrix.py
         # 返回 (f1,f2,f3,f4,f5)
         return [f1,f2,f3,f4,f5]
 
-    compute_features(...)  # 调用时会自动把返回的五个特征追加为新的一列
+    compute_features(...)  # 调用时会自动把返回的六个特征追加为新的一列
 
 """
 
@@ -152,19 +152,3 @@ def collect_features(collector: FeatureMatrixCollector) -> Callable:
         return wrapper
 
     return decorator
-
-
-if __name__ == '__main__':
-    # 简单演示：模拟 compute_features 返回六个特征并被装饰器收集为列矩阵
-    collector = FeatureMatrixCollector(n_features=6, as_columns=True)
-
-    @collect_features(collector)
-    def demo_compute(i):
-        # 返回 6 个特征：示例为 i 的不同变换
-        return [i, i * 0.1, i ** 2, float(i % 3), 1.0 / (1 + i), (i % 5) * 0.2]
-
-    for i in range(1, 6):
-        demo_compute(i)
-
-    print('矩阵形状（rows=features, cols=samples）:', collector.matrix.shape)
-    print(collector.matrix)
