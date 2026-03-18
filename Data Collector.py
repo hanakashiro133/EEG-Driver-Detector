@@ -5,7 +5,7 @@ from feature_matrix import FeatureMatrixCollector, collect_features
 from scipy.stats import entropy
 from datetime import datetime
 
-# 每隔多少个样本保存一次完整 CSV（同时仍然进行增量追加）
+# 每隔100个样本保存一次完整 CSV
 SAVE_EVERY = 100
 
 def calculate_psd(data):
@@ -18,8 +18,8 @@ def calculate_psd(data):
     features3 = PSD_a / addall if addall != 0 else 0  # Alpha/总PSD
     features4 = data.delta / addall if addall != 0 else 0  # Delta/总PSD
     features5 = data.delta
-    # 新增第6个特征：基于各波段 PSD 的谱熵（delta, alpha, beta, theta）
-    p = np.array([data.delta, PSD_a, PSD_b, data.theta], dtype=float)
+    
+    p = np.array([data.delta, PSD_a, PSD_b, data.theta], dtype=float) #基于各波段 PSD 的谱熵（delta, alpha, beta, theta）
     s = p.sum()
     if s > 0:
         p_norm = p / s
@@ -27,10 +27,8 @@ def calculate_psd(data):
     else:
         features6 = 0.0
 
-    # 返回六个特征的序列，便于装饰器或外部函数收集
     return [features1, features2, features3, features4, features5, features6]
 
-# 创建特征矩阵收集器并包装 calculate_psd，使每次解析到的数据的 6 个特征被自动追加到矩阵
 collector = FeatureMatrixCollector(n_features=6, as_columns=True)
 wrapped_calculate_psd = collect_features(collector)(calculate_psd)
 parser = BrainLinkParser(wrapped_calculate_psd)
